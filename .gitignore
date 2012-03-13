@@ -10,7 +10,7 @@ XmppBot.Extensions
 XmppBot.Extensions.Tests
 XmppBot.Plugin.Twss
 
-!XMPP_bot\XMPP_bot\lib
+!XMPP_bot\XMPP_bot\lib\*.*
 
 # Compiled source #
 ###################
