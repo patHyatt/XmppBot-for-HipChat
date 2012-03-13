@@ -3,13 +3,14 @@
 *.testsettings
 *.config
 
-
 bin
 obj
 TestResults
 XmppBot.Extensions
 XmppBot.Extensions.Tests
 XmppBot.Plugin.Twss
+
+!XMPP_bot\XMPP_bot\lib
 
 # Compiled source #
 ###################
