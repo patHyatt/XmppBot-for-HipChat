@@ -1,0 +1,37 @@
+To add functionality implement the IXmppBotPlugin interface and decorate the class with [Export(typeof(IXmppBotPlugin))].
+Implement the interfaces methods (Evaluate and Name).
+Uberfy your HipChat.
+
+Example:
+
+using System;
+using System.ComponentModel.Composition;
+using System.Linq;
+
+using XmppBot.Common;
+
+namespace XmppBot.Extensions
+{
+    [Export(typeof(IXmppBotPlugin))]
+    public class SmackEm : IXmppBotPlugin
+    {
+        public string Evaluate(ParsedLine line)
+        {
+            if (!line.IsCommand)
+                return "";
+
+            switch (line.Command.ToLower())
+            {
+                case "smack":
+                    return String.Format("{0} smacks {1} around with a trout.", line.User, line.Args.FirstOrDefault() ?? "Your mom");
+
+                default: return null;
+            }
+        }
+
+        public string Name
+        {
+            get { return "Smack Em!"; }
+        }
+    }
+}
