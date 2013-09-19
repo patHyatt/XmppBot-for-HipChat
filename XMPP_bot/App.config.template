@@ -1,10 +1,14 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <configuration>
+  <startup useLegacyV2RuntimeActivationPolicy="true">
+    <supportedRuntime version="v4.0" sku=".NETFramework,Version=v4.0" />
+  </startup>
   <appSettings>
     <!--All of this info can be found on the XMPP/Jabber info section @ https://YOUR-SUBDOMAIN.hipchat.com/account/xmpp-->
     <add key="Server" value="chat.hipchat.com"/>
+    <add key="ConferenceServer" value="conf.hipchat.com" />
     <!--Username i.e. 1234_56789-->
-    <add key="User" value=""/>    
+    <add key="User" value=""/>
     <!--Password, this is not displayed on page-->
     <add key="Password" value=""/>
     <!--Necessary to avoid bot reciving room history-->
@@ -12,6 +16,6 @@
     <!--Room nickname-->
     <add key="RoomNick" value=""/>
     <!--Comma separated list of rooms for your bot to join i.e. 1234_builds, 1234_development-->
-    <add key="Rooms" value=""/>    
+    <add key="Rooms" value=""/>
   </appSettings>
 </configuration>
