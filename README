@@ -1,4 +1,9 @@
-To add functionality implement the IXmppBotPlugin interface and decorate the class with [Export(typeof(IXmppBotPlugin))].
+To use:
+Copy/Paste the App.config.template file and rename to App.config. Inside the newly named App.config file, fill in key entries with appropriate values from your XMPP page in hipchat.
+
+
+To add functionality:
+Implement the IXmppBotPlugin interface and decorate the class with [Export(typeof(IXmppBotPlugin))].
 Implement the interfaces methods (Evaluate and Name).
 Uberfy your HipChat.
 
