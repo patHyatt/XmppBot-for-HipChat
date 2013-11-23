@@ -9,7 +9,7 @@ Uberfy your HipChat.
 
 Example:
 
-```C#
+```c#
 using System;
 using System.ComponentModel.Composition;
 using System.Linq;
