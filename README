@@ -9,6 +9,7 @@ Uberfy your HipChat.
 
 Example:
 
+```C#
 using System;
 using System.ComponentModel.Composition;
 using System.Linq;
@@ -40,3 +41,4 @@ namespace XmppBot.Extensions
         }
     }
 }
+```
