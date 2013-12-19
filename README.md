@@ -42,3 +42,9 @@ namespace XmppBot.Extensions
     }
 }
 ```
+
+You can run the bot as a console application, or you can install it as a Windows Service by running: 
+
+	XMPP_bot.exe install
+
+For more info about installing as a service, see the [TopShelf documentation](http://docs.topshelf-project.com/en/latest/overview/commandline.html).
