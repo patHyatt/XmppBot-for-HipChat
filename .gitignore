@@ -3,6 +3,8 @@
 *.testsettings
 *.config
 
+!packages.config
+
 bin
 obj
 TestResults
