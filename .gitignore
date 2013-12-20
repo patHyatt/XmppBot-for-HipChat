@@ -3,6 +3,8 @@
 *.testsettings
 *.config
 
+!packages.config
+
 bin
 obj
 TestResults
@@ -46,3 +48,7 @@ XmppBot.Plugin.Twss
 ehthumbs.db
 Icon?
 Thumbs.db
+
+#NuGet
+packages/
+*.nupkg
