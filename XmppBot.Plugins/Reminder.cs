@@ -6,6 +6,9 @@ using XmppBot.Common;
 
 namespace XmppBot.Plugins
 {
+    /// <summary>
+    /// Adds a command to tell the bot to remind you of something at a specified time
+    /// </summary>
     [Export(typeof(IXmppBotSequencePlugin))]
     public class Reminder : IXmppBotSequencePlugin
     {

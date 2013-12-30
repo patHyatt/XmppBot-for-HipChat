@@ -7,6 +7,10 @@ using XmppBot.Common;
 
 namespace XmppBot.Plugins
 {
+    /// <summary>
+    /// Adds commands to tell the bot to watch a folder and send chat 
+    /// messages when files are created, renamed, or deleted. 
+    /// </summary>
     [Export(typeof(IXmppBotSequencePlugin))]
     public class WatchFolder : IXmppBotSequencePlugin
     {
