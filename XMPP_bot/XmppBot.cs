@@ -132,10 +132,10 @@ namespace XMPP_bot
                         break;
 
                     default:
-                        Parallel.ForEach<IXmppBotPlugin>(Plugins,
-                            plugin => SendMessage(msg.From, plugin.Evaluate(line), msg.Type)
-                            );
-
+                        Task.Factory.StartNew(() =>
+                                              Parallel.ForEach(Plugins,
+                                                  plugin => SendMessage(msg.From, plugin.Evaluate(line), msg.Type)
+                                                  ));
                         break;
                 }
             }
