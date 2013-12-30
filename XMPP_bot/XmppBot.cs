@@ -3,8 +3,10 @@ using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.ComponentModel.Composition.Hosting;
 using System.Configuration;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Reactive;
 using System.Text;
 using System.Threading.Tasks;
 using XmppBot.Common;
@@ -41,7 +43,9 @@ namespace XMPP_bot
 
             _catalog = new DirectoryCatalog(Environment.CurrentDirectory + "\\plugins\\");
             _catalog.Changed += new EventHandler<ComposablePartCatalogChangeEventArgs>(_catalog_Changed);
-            LoadPlugins();
+            var pluginList = LoadPlugins();
+
+            Console.WriteLine(pluginList);
 
             _client = new XmppClientConnection(ConfigurationManager.AppSettings["Server"]);
 
@@ -136,6 +140,11 @@ namespace XMPP_bot
                                               Parallel.ForEach(Plugins,
                                                   plugin => SendMessage(msg.From, plugin.Evaluate(line), msg.Type)
                                                   ));
+
+                        Task.Factory.StartNew(() =>
+                                              Parallel.ForEach(SequencePlugins,
+                                                  plugin => SendSequence(msg.From, plugin.Evaluate(line), msg.Type)
+                                                  ));
                         break;
                 }
             }
@@ -148,13 +157,31 @@ namespace XMPP_bot
             _client.Send(new Message(to, type, text));
         }
 
+        public static void SendSequence(Jid to, IObservable<string> messages, MessageType type)
+        {
+            if(messages == null)
+            {
+                return;
+            }
+
+            var observer = Observer.Create<string>(
+                msg => SendMessage(to, msg, type),
+                exception => Trace.TraceError(exception.ToString()));
+
+            messages.Subscribe(observer);
+        }
+
         [ImportMany(AllowRecomposition = true)]
         public static IEnumerable<IXmppBotPlugin> Plugins { get; set; }
+
+        [ImportMany(AllowRecomposition = true)]
+        public static IEnumerable<IXmppBotSequencePlugin> SequencePlugins { get; set; }
 
         private static string LoadPlugins()
         {
             var container = new CompositionContainer(_catalog);
             Plugins = container.GetExportedValues<IXmppBotPlugin>();
+            SequencePlugins = container.GetExportedValues<IXmppBotSequencePlugin>();
 
             StringBuilder builder = new StringBuilder();
             builder.AppendLine("Loaded the following plugins");
