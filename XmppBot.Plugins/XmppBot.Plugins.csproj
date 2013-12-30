@@ -57,6 +57,7 @@
     <Compile Include="Example.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Reminder.cs" />
+    <Compile Include="Watch.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\XmppBot.Common\XmppBot.Common.csproj">

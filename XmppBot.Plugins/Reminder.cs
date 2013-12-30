@@ -11,7 +11,7 @@ namespace XmppBot.Plugins
     {
         public IObservable<string> Evaluate(ParsedLine line)
         {
-            if (!line.IsCommand || line.Command.ToLower() != "reminder")
+            if(!line.IsCommand || line.Command.ToLower() != "reminder")
             {
                 return null;
             }
@@ -19,7 +19,7 @@ namespace XmppBot.Plugins
             string help = "!reminder [time] [message]";
 
             // Verify we have enough arguments
-            if (line.Args.Length < 2)
+            if(line.Args.Length < 2)
             {
                 return Observable.Return(help);
             }
@@ -27,18 +27,19 @@ namespace XmppBot.Plugins
             DateTimeOffset time;
 
             // Parse the arguments
-            if (!DateTimeOffset.TryParse(line.Args[0], out time))
+            if(!DateTimeOffset.TryParse(line.Args[0], out time))
             {
                 return Observable.Return(help);
             }
 
-            var message = line.Args.Skip(1).Aggregate(String.Empty, (s, s1) => s + (s.Length == 0 ? "" : " ") + s1);
+            // We want anything entered after the time to be included in the reminder
+            string message = line.Args.Skip(1).Aggregate(String.Empty, (s, s1) => s + (s.Length == 0 ? "" : " ") + s1);
 
             // Create an sequence that fires off single value at a specified time
             // and transform that value into the reminder message
-            var seq = Observable.Timer(time).Select(l => message);
+            IObservable<string> seq = Observable.Timer(time).Select(l => message);
 
-            // Add a start and end message
+            // Add a start message
             return Observable.Return(String.Format("Will do - I'll remind you at {0}.", time))
                              .Concat(seq);
         }
