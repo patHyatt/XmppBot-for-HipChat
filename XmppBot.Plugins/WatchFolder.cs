@@ -57,8 +57,8 @@ namespace XmppBot.Plugins
 
                 // Merge all the events into a single stream
                 var changes = obsCreated.Merge(obsDeleted).Merge(obsRenamed)
-                    .Merge(_unwatch.Where(s => s.Contains(path))) // Merge with the stream of unwatch requests which match this path
-                    .TakeWhile(args => args != path); // end the sequence when we get a string that just matches the path (which would be from the unwatch)
+                                        .Merge(_unwatch.Where(s => s.Contains(path))) // Merge with the stream of unwatch requests which match this path
+                                        .TakeWhile(args => args != path); // end the sequence when we get a string that just matches the path (which would be from the unwatch)
                                                         
                 // Add a start message and return the observable stream
                 return Observable.Return(String.Format("Watching for changes to {0}.", path))
