@@ -32,7 +32,7 @@ namespace XmppBot.Plugins
                 return null;
             }
 
-            if (!line.IsCommand || line.Command.ToLower() != "watchfolder")
+            if (!line.IsCommand || line.Command.ToLower() != "watch")
             {
                 return null;
             }
