@@ -9,9 +9,9 @@ using XmppBot.Common;
 namespace XmppBot.Plugins
 {
     [Export(typeof(IXmppBotPlugin))]
-    public class Example : IXmppBotPlugin
+    public class Example : XmppBotPluginBase, IXmppBotPlugin
     {
-        public string Evaluate(ParsedLine line)
+        public override string EvaluateEx(ParsedLine line)
         {
             if (!line.IsCommand) return string.Empty;
 
@@ -31,7 +31,7 @@ namespace XmppBot.Plugins
             }
         }
 
-        public string Name
+        public override string Name
         {
             get { return "User Actions"; }
         }

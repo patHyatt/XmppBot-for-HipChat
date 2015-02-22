@@ -9,10 +9,10 @@ namespace XmppBot.Plugins
     /// <summary>
     /// Adds a command to tell the bot to remind you of something at a specified time
     /// </summary>
-    [Export(typeof(IXmppBotSequencePlugin))]
-    public class Reminder : IXmppBotSequencePlugin
+    [Export(typeof(IXmppBotPlugin))]
+    public class Reminder : XmppBotPluginBase, IXmppBotPlugin
     {
-        public IObservable<string> Evaluate(ParsedLine line)
+        public override string EvaluateEx(ParsedLine line)
         {
             if(!line.IsCommand || line.Command.ToLower() != "reminder")
             {
@@ -24,7 +24,7 @@ namespace XmppBot.Plugins
             // Verify we have enough arguments
             if(line.Args.Length < 2)
             {
-                return Observable.Return(help);
+                return help;
             }
 
             DateTimeOffset time;
@@ -32,7 +32,7 @@ namespace XmppBot.Plugins
             // Parse the arguments
             if(!DateTimeOffset.TryParse(line.Args[0], out time))
             {
-                return Observable.Return(help);
+                return help;
             }
 
             // We want anything entered after the time to be included in the reminder
@@ -42,12 +42,15 @@ namespace XmppBot.Plugins
             // and transform that value into the reminder message
             IObservable<string> seq = Observable.Timer(time).Select(l => message);
 
+            seq.Subscribe((msg) => { 
+                this.SendMessage(msg, line.User.Id, BotMessageType.chat); 
+            });
+
             // Add a start message
-            return Observable.Return(String.Format("Will do - I'll remind you at {0}.", time))
-                             .Concat(seq);
+            return string.Format("Will do - I'll remind you at {0}.", time);
         }
 
-        public string Name
+        public override string Name
         {
             get { return "Reminder"; }
         }

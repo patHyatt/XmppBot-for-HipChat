@@ -128,13 +128,25 @@ namespace XmppBot.Service
                 log.InfoFormat("Message : {0} - from {1}", msg.Body, msg.From);
 
                 IChatUser user = null;
-                _roster.TryGetValue(msg.From.Bare, out user);
+
+                if (msg.Type == MessageType.groupchat)
+                {
+                    //msg.From.Resource = User Room Name
+                    //msg.From.Bare = Room 'email'
+                    //msg.From.User = Room id
+
+                    user = _roster.Values.FirstOrDefault(u => u.Name == msg.From.Resource);
+                }
+                else
+                {
+                    _roster.TryGetValue(msg.From.Bare, out user);
+                }
 
                 // we can't find a user or this is the bot talking
                 if (null == user || ConfigurationManager.AppSettings["RoomNick"] == user.Name)
                     return;
 
-                ParsedLine line = new ParsedLine(msg.Body.Trim(), user.Name);
+                ParsedLine line = new ParsedLine(msg.From.Bare, msg.Body.Trim(), user);
 
                 switch (line.Command)
                 {
@@ -152,14 +164,21 @@ namespace XmppBot.Service
                                               Parallel.ForEach(Plugins,
                                                   plugin => SendMessage(msg.From, plugin.Evaluate(line), msg.Type)
                                                   ));
-
-                        Task.Factory.StartNew(() =>
-                                              Parallel.ForEach(SequencePlugins,
-                                                  plugin => SendSequence(msg.From, plugin.Evaluate(line), msg.Type)
-                                                  ));
                         break;
                 }
             }
+        }
+
+
+        #region Message Senders
+
+        public static void SendMessage(string text, string jid, BotMessageType messageType)
+        {
+            //msg.from or jid
+            if (!jid.Contains("@"))
+                jid = jid + "@" + ConfigurationManager.AppSettings["Server"];
+
+            SendMessage(new Jid(jid), text, (MessageType)messageType);
         }
 
         public static void SendMessage(Jid to, string text, MessageType type)
@@ -183,17 +202,25 @@ namespace XmppBot.Service
             messages.Subscribe(observer);
         }
 
-        [ImportMany(AllowRecomposition = true)]
-        public static IEnumerable<IXmppBotPlugin> Plugins { get; set; }
+        #endregion
 
         [ImportMany(AllowRecomposition = true)]
-        public static IEnumerable<IXmppBotSequencePlugin> SequencePlugins { get; set; }
+        public static IEnumerable<IXmppBotPlugin> Plugins { get; set; }
 
         private static string LoadPlugins()
         {
             var container = new CompositionContainer(_catalog);
             Plugins = container.GetExportedValues<IXmppBotPlugin>();
-            SequencePlugins = container.GetExportedValues<IXmppBotSequencePlugin>();
+
+            foreach (IXmppBotPlugin plugin in Plugins)
+            {
+                // wire up message send event
+                plugin.SentMessage += new PluginMessageHandler(SendMessage);
+
+                // wire up plugin init
+                plugin.Initialize();
+            }
+
 
             StringBuilder builder = new StringBuilder();
             builder.AppendLine("Loaded the following plugins");

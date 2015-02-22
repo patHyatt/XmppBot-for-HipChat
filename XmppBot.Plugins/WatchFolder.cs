@@ -11,19 +11,19 @@ namespace XmppBot.Plugins
     /// Adds commands to tell the bot to watch a folder and send chat 
     /// messages when files are created, renamed, or deleted. 
     /// </summary>
-    [Export(typeof(IXmppBotSequencePlugin))]
-    public class WatchFolder : IXmppBotSequencePlugin
+    [Export(typeof(IXmppBotPlugin))]
+    public class WatchFolder : XmppBotPluginBase, IXmppBotPlugin
     {
         // This will act as a way to funnel unwatch requests into the observable streams
         private readonly Subject<string> _unwatch = new Subject<string>();
-        
-        public IObservable<string> Evaluate(ParsedLine line)
+
+        public override string EvaluateEx(ParsedLine line)
         {
-            if(line.IsCommand && line.Command.ToLower() == "unwatch")
+            if (line.IsCommand && line.Command.ToLower() == "unwatch")
             {
-                if(line.Args.Length < 1)
+                if (line.Args.Length < 1)
                 {
-                    return Observable.Return("!unwatch [path]");
+                    return "!unwatch [path]";
                 }
 
                 // Request that this path no longer be watched
@@ -40,9 +40,9 @@ namespace XmppBot.Plugins
             string help = "!watch [path]";
 
             // Verify we have enough arguments
-            if(line.Args.Length < 1)
+            if (line.Args.Length < 1)
             {
-                return Observable.Return(help);
+                return help;
             }
 
             string path = line.Args[0];
@@ -58,25 +58,31 @@ namespace XmppBot.Plugins
                 var obsCreated = fsw.CreateObservableForCreated().Select(args => String.Format("{0} was created", args.Name));
                 var obsDeleted = fsw.CreateObservableForDeleted().Select(args => String.Format("{0} was deleted", args.Name));
                 var obsRenamed = fsw.CreateObservableForRenamed().Select(args => String.Format("{0} was renamed", args.Name));
+                var txt = Observable.Return(String.Format("Watching for changes to {0}.", path));
 
                 // Merge all the events into a single stream
-                var changes = obsCreated.Merge(obsDeleted).Merge(obsRenamed)
+                var changes = 
+                    txt.Concat(
+                    
+                    obsCreated.Merge(obsDeleted).Merge(obsRenamed)
                                         .Merge(_unwatch.Where(s => s.Contains(path))) // Merge with the stream of unwatch requests which match this path
-                                        .TakeWhile(args => args != path); // end the sequence when we get a string that just matches the path (which would be from the unwatch)
-                                                        
-                // Add a start message and return the observable stream
-                return Observable.Return(String.Format("Watching for changes to {0}.", path))
-                                 .Concat(changes)
-                                 .Concat(Observable.Return(string.Format("Done watching {0}.", path)));
+                                        .TakeWhile(args => args != path)); // end the sequence when we get a string that just matches the path (which would be from the unwatch)
+
+                changes.Subscribe((msg) =>
+                {
+                    this.SendMessage(msg, line.From, BotMessageType.chat);
+                });
+
+                return null;
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 // Show the error in the chat - most likely it'll be an invalid path issue
-                return Observable.Return(ex.Message);
+                return ex.Message;
             }
         }
 
-        public string Name
+        public override string Name
         {
             get { return "WatchFolder"; }
         }

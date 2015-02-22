@@ -9,12 +9,12 @@ namespace XmppBot.Plugins
     /// Adds a command to tell the bot to count down from a specified number of seconds to zero
     /// by a specified interval. 
     /// </summary>
-    [Export(typeof(IXmppBotSequencePlugin))]
-    public class CountdownTimer : IXmppBotSequencePlugin
+    [Export(typeof(IXmppBotPlugin))]
+    public class CountdownTimer : XmppBotPluginBase, IXmppBotPlugin
     {
-        public IObservable<string> Evaluate(ParsedLine line)
+        public override string EvaluateEx(ParsedLine line)
         {
-            if(!line.IsCommand || line.Command.ToLower() != "countdown")
+            if (!line.IsCommand || line.Command.ToLower() != "countdown")
             {
                 return null;
             }
@@ -22,18 +22,18 @@ namespace XmppBot.Plugins
             string help = "!countdown [seconds] [interval]";
 
             // Verify we have enough arguments
-            if(line.Args.Length < 2)
+            if (line.Args.Length < 2)
             {
-                return Observable.Return(help);
+                return help;
             }
 
             int seconds;
             int interval;
 
             // Parse the arguments
-            if(!int.TryParse(line.Args[0], out seconds) || !int.TryParse(line.Args[1], out interval))
+            if (!int.TryParse(line.Args[0], out seconds) || !int.TryParse(line.Args[1], out interval))
             {
-                return Observable.Return(help);
+                return help;
             }
 
             // Create an interval sequence that fires off a value every [interval] seconds
@@ -46,15 +46,19 @@ namespace XmppBot.Plugins
                                                 .Select(
                                                     l =>
                                                     String.Format("{0} seconds remaining...",
-                                                        seconds - ((l + 1) * interval)));
+                                                        seconds - ((l + 1) * interval)))
 
-            // Add a start and end message
-            return Observable.Return(String.Format("Starting countdown - {0} seconds remaining...", seconds))
-                             .Concat(seq)
-                             .Concat(Observable.Return("Finished!"));
+
+                                                .Concat(Observable.Return("Finished!"));
+            seq.Subscribe((msg) =>
+            {
+                this.SendMessage(msg, line.From, BotMessageType.groupchat);
+            });
+
+            return null;
         }
 
-        public string Name
+        public override string Name
         {
             get { return "CountdownTimer"; }
         }

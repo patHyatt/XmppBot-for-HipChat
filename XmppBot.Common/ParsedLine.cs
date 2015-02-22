@@ -4,14 +4,15 @@ namespace XmppBot.Common
 {
     public class ParsedLine
     {
-        public ParsedLine(string line, string user)
+        public ParsedLine(string from, string line, IChatUser user)
         {
-            ParseLine(line);
+            ParseLine(from, line);
             this.User = user;
         }
 
-        private void ParseLine(string line)
+        private void ParseLine(string from, string line)
         {
+            this.From = from;
             this.Raw = line;
             this.IsCommand = line.StartsWith("!");
             line = line.TrimStart('!');
@@ -30,9 +31,15 @@ namespace XmppBot.Common
         }
 
         public string Command { get; private set; }
+
         public string Raw { get; private set; }
+
         public string[] Args { get; private set; }
+
         public bool IsCommand { get; private set; }
-        public string User { get; private set; }
+
+        public IChatUser User { get; private set; }
+
+        public string From { get; private set; }
     }
 }

@@ -53,11 +53,13 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BotMessageType.cs" />
     <Compile Include="IChatUser.cs" />
-    <Compile Include="IXmppBotSequencePlugin.cs" />
     <Compile Include="ParsedLine.cs" />
     <Compile Include="IXmppBotPlugin.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="XmppBotCommand.cs" />
+    <Compile Include="XmppBotPluginBase.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
