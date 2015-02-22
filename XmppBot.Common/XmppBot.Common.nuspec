@@ -12,5 +12,11 @@
     <description>$description$</description>
     <releaseNotes>This is the first version ever.</releaseNotes>
     <copyright>Copyright 2011</copyright>
+	<references>
+	  <reference file="agsXMPP.dll" />
+	</references>
   </metadata>
+  <files>
+    <file src="lib\net40\agsXMPP.dll" target="lib\net40"/>
+  </files>
 </package>
