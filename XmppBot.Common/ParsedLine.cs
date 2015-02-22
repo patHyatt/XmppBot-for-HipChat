@@ -1,4 +1,6 @@
-﻿using System.Linq;
+﻿using Ader.Text;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace XmppBot.Common
 {
@@ -6,8 +8,10 @@ namespace XmppBot.Common
     {
         public ParsedLine(string from, string line, IChatUser user)
         {
-            ParseLine(from, line);
             this.User = user;
+            this.Tokens = new Tokens();
+
+            ParseLine(from, line);
         }
 
         private void ParseLine(string from, string line)
@@ -28,6 +32,38 @@ namespace XmppBot.Common
 
             this.Command = parts[0];
             this.Args = parts.Skip(1).ToArray();
+
+            TokenizeLine(line);
+        }
+
+        private void TokenizeLine(string line)
+        {
+            StringTokenizer tokenizer = new StringTokenizer(line) { IgnoreWhiteSpace = true, RemoveQuotes = true };
+
+            Token token;
+            int tokenIndex = 0;
+            this.Tokens.Args = new List<string>();
+            do
+            {
+                token = tokenizer.Next();
+                switch (tokenIndex++)
+                {
+                    case 0:
+                        {
+                            this.Tokens.Command = token.Value;
+                            break;
+                        }
+                    default:
+                        {
+                            if (!string.IsNullOrWhiteSpace(token.Value))
+                            {
+                                this.Tokens.Args.Add(token.Value.TrimStart(new char[] { '\\' }).TrimEnd(new char[] { '\\' }));
+                            }
+                            break;
+                        }
+                }
+            } while (token.Kind != TokenKind.EOF);
+
         }
 
         public string Command { get; private set; }
@@ -41,5 +77,7 @@ namespace XmppBot.Common
         public IChatUser User { get; private set; }
 
         public string From { get; private set; }
+
+        public Tokens Tokens { get; set; }
     }
 }
