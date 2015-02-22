@@ -1,24 +1,20 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.Composition;
-using System.ComponentModel.Composition.Hosting;
-using System.Configuration;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
-using System.Reactive;
-using System.Text;
-using System.Threading.Tasks;
-using XmppBot.Common;
-using agsXMPP;
+﻿using agsXMPP;
 using agsXMPP.protocol.client;
 using agsXMPP.protocol.iq.roster;
 using agsXMPP.protocol.x.muc;
 using log4net;
+using System;
+using System.Collections.Generic;
+using System.ComponentModel.Composition;
+using System.ComponentModel.Composition.Hosting;
+using System.IO;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
-namespace XmppBot.Service
+namespace XmppBot.Common
 {
-    class XmppBot
+    public class Bot
     {
         #region log4net
         private static readonly ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
@@ -29,6 +25,13 @@ namespace XmppBot.Service
         private static DirectoryCatalog _catalog = null;
         private static XmppClientConnection _client = null;
 
+
+        private XmppBotConfig _config;
+
+        public Bot(XmppBotConfig config)
+        {
+            _config = config;
+        }
 
         public void Stop()
         {
@@ -54,7 +57,7 @@ namespace XmppBot.Service
 
             log.Info(pluginList);
 
-            _client = new XmppClientConnection(ConfigurationManager.AppSettings["Server"]);
+            _client = new XmppClientConnection(_config.Server);
 
             //_client.ConnectServer = "talk.google.com"; //necessary if connecting to Google Talk
             _client.AutoResolveConnectServer = false;
@@ -64,64 +67,30 @@ namespace XmppBot.Service
             _client.OnError += new ErrorHandler(_client_OnError);
 
             log.Info("Connecting...");
-            _client.Resource = ConfigurationManager.AppSettings["Resource"];
-            _client.Open(ConfigurationManager.AppSettings["User"], ConfigurationManager.AppSettings["Password"]);
+            _client.Resource = _config.Resource;
+            _client.Open(_config.User, _config.Password);
             log.Info("Connected.");
 
             _client.OnRosterStart += new ObjectHandler(_client_OnRosterStart);
             _client.OnRosterItem += new XmppClientConnection.RosterHandler(_client_OnRosterItem);
         }
 
-        static void _client_OnError(object sender, Exception ex)
-        {
-            log.Error("Exception: " + ex);
-        }
+        #region Xmpp Events
 
-        static void _catalog_Changed(object sender, ComposablePartCatalogChangeEventArgs e)
-        {
-            _catalog.Refresh();
-        }
-
-        #region Roster Management
-
-        private static Dictionary<string, IChatUser> _roster = new Dictionary<string, IChatUser>(MaxRosterSize);
-
-        static void _client_OnRosterStart(object sender)
-        {
-            _roster = new Dictionary<string, IChatUser>(MaxRosterSize);
-        }
-
-        static void _client_OnRosterItem(object sender, RosterItem item)
-        {
-            if (!_roster.ContainsKey(item.Jid.User))
-            {
-                _addRoster(new ChatUser(item));
-            }
-        }
-
-        private static void _addRoster(IChatUser user)
-        {
-            if (!_roster.ContainsKey(user.Bare))
-                _roster.Add(user.Bare, user);
-        }
-
-        #endregion
-
-
-        static void xmpp_OnLogin(object sender)
+        void xmpp_OnLogin(object sender)
         {
             MucManager mucManager = new MucManager(_client);
 
-            string[] rooms = ConfigurationManager.AppSettings["Rooms"].Split(',');
+            string[] rooms = _config.Rooms.Split(',');
 
             foreach (string room in rooms)
             {
-                Jid jid = new Jid(room + "@" + ConfigurationManager.AppSettings["ConferenceServer"]);
-                mucManager.JoinRoom(jid, ConfigurationManager.AppSettings["RoomNick"]);
+                Jid jid = new Jid(room + "@" + _config.ConferenceServer);
+                mucManager.JoinRoom(jid, _config.RoomNick);
             }
         }
 
-        static void xmpp_OnMessage(object sender, Message msg)
+        private void xmpp_OnMessage(object sender, Message msg)
         {
             if (!string.IsNullOrEmpty(msg.Body))
             {
@@ -143,7 +112,7 @@ namespace XmppBot.Service
                 }
 
                 // we can't find a user or this is the bot talking
-                if (null == user || ConfigurationManager.AppSettings["RoomNick"] == user.Name)
+                if (null == user || _config.RoomNick == user.Name)
                     return;
 
                 ParsedLine line = new ParsedLine(msg.From.Bare, msg.Body.Trim(), user);
@@ -170,44 +139,69 @@ namespace XmppBot.Service
         }
 
 
+        static void _client_OnError(object sender, Exception ex)
+        {
+            log.Error("Exception: " + ex);
+        }
+
+        static void _catalog_Changed(object sender, ComposablePartCatalogChangeEventArgs e)
+        {
+            _catalog.Refresh();
+        }
+
+        #endregion
+
+        #region Roster Management
+
+        private static Dictionary<string, IChatUser> _roster = new Dictionary<string, IChatUser>(MaxRosterSize);
+
+        static void _client_OnRosterStart(object sender)
+        {
+            _roster = new Dictionary<string, IChatUser>(MaxRosterSize);
+        }
+
+        static void _client_OnRosterItem(object sender, RosterItem item)
+        {
+            if (!_roster.ContainsKey(item.Jid.User))
+            {
+                _addRoster(new ChatUser(item));
+            }
+        }
+
+        private static void _addRoster(IChatUser user)
+        {
+            if (!_roster.ContainsKey(user.Bare))
+                _roster.Add(user.Bare, user);
+        }
+
+        #endregion
+
         #region Message Senders
 
-        public static void SendMessage(string text, string jid, BotMessageType messageType)
+        private void SendMessage(string text, string jid, BotMessageType messageType)
         {
             //msg.from or jid
             if (!jid.Contains("@"))
-                jid = jid + "@" + ConfigurationManager.AppSettings["Server"];
+                jid = jid + "@" + _config.Server;
 
             SendMessage(new Jid(jid), text, (MessageType)messageType);
         }
 
-        public static void SendMessage(Jid to, string text, MessageType type)
+        private void SendMessage(Jid to, string text, MessageType type)
         {
             if (text == null) return;
 
             _client.Send(new Message(to, type, text));
         }
 
-        public static void SendSequence(Jid to, IObservable<string> messages, MessageType type)
-        {
-            if(messages == null)
-            {
-                return;
-            }
-
-            var observer = Observer.Create<string>(
-                msg => SendMessage(to, msg, type),
-                exception => Trace.TraceError(exception.ToString()));
-
-            messages.Subscribe(observer);
-        }
-
         #endregion
+
+        #region Plugin Management
 
         [ImportMany(AllowRecomposition = true)]
         public static IEnumerable<IXmppBotPlugin> Plugins { get; set; }
 
-        private static string LoadPlugins()
+        private string LoadPlugins()
         {
             var container = new CompositionContainer(_catalog);
             Plugins = container.GetExportedValues<IXmppBotPlugin>();
@@ -232,6 +226,7 @@ namespace XmppBot.Service
             return builder.ToString();
         }
 
+        #endregion
 
     }
 }

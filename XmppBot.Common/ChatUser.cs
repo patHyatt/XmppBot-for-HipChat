@@ -3,9 +3,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using XmppBot.Common;
 
-namespace XmppBot.Service
+namespace XmppBot.Common
 {
     public class ChatUser : IChatUser
     {

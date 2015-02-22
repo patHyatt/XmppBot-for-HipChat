@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using Topshelf;
+using XmppBot.Common;
 
 namespace XmppBot.Service
 {
@@ -10,9 +11,9 @@ namespace XmppBot.Service
         {
             HostFactory.Run(x =>                                 
             {
-                x.Service<XmppBot>(s =>
+                x.Service<Bot>(s =>
                     {
-                        s.ConstructUsing(name => new XmppBot());
+                        s.ConstructUsing(name => new Bot(XmppBotConfig.FromAppConfig()));
                         s.WhenStarted(xmppbot => xmppbot.Start());   
                         s.WhenStopped(xmppbot => xmppbot.Stop());     
                     });

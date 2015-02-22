@@ -31,8 +31,15 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="agsXMPP">
+      <HintPath>..\lib\agsXMPP.dll</HintPath>
+    </Reference>
+    <Reference Include="log4net">
+      <HintPath>..\packages\log4net.2.0.3\lib\net40-full\log4net.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.Composition" />
+    <Reference Include="System.configuration" />
     <Reference Include="System.Core" />
     <Reference Include="System.Reactive.Core">
       <HintPath>..\packages\Rx-Core.2.2.2\lib\net40\System.Reactive.Core.dll</HintPath>
@@ -54,12 +61,15 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BotMessageType.cs" />
+    <Compile Include="ChatUser.cs" />
     <Compile Include="IChatUser.cs" />
     <Compile Include="ParsedLine.cs" />
     <Compile Include="IXmppBotPlugin.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Tokens.cs" />
+    <Compile Include="XmppBot.cs" />
     <Compile Include="XmppBotCommand.cs" />
+    <Compile Include="XmppBotConfig.cs" />
     <Compile Include="XmppBotPluginBase.cs" />
   </ItemGroup>
   <ItemGroup>

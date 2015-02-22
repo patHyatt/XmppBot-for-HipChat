@@ -71,7 +71,7 @@
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>mkdir "$(SolutionDir)XMPP_Bot\bin\$(ConfigurationName)\plugins\"
-copy "$(TargetDir)*.*" "$(SolutionDir)XMPP_Bot\bin\$(ConfigurationName)\plugins\"
+copy "$(TargetDir)*.*" "$(SolutionDir)XmppBot\bin\$(ConfigurationName)\plugins\"
 del "$(SolutionDir)XMPP_Bot\bin\$(ConfigurationName)\plugins\SecureBlackbox.dll"
 del "$(SolutionDir)XMPP_Bot\bin\$(ConfigurationName)\plugins\SecureBlackbox.PGP.dll"</PostBuildEvent>
   </PropertyGroup>

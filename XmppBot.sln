@@ -3,16 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
 VisualStudioVersion = 12.0.31101.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XmppBot", "XmppBot\XmppBot.csproj", "{5A73E507-2C67-48CA-BD24-CEA8898E9180}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XmppBot.Service", "XmppBot\XmppBot.Service.csproj", "{5A73E507-2C67-48CA-BD24-CEA8898E9180}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XmppBot.Common", "XmppBot.Common\XmppBot.Common.csproj", "{7553588F-7628-4689-B02B-CC2F504F82C2}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{EE28B61C-BAAF-47CB-9D65-719DFD690C48}"
-	ProjectSection(SolutionItems) = preProject
-		Local.testsettings = Local.testsettings
-		TraceAndTestImpact.testsettings = TraceAndTestImpact.testsettings
-		XmppBot.vsmdi = XmppBot.vsmdi
-	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XmppBot.Plugins", "XmppBot.Plugins\XmppBot.Plugins.csproj", "{B11E3F86-CEA6-4EA6-B15F-7819C57E8A92}"
 EndProject
