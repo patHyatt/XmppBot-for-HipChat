@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<package >
+  <metadata>
+    <id>$id$</id>
+    <version>$version$</version>
+    <title>$title$</title>
+    <authors>$author$</authors>
+    <owners>$author$</owners>
+    <licenseUrl>https://github.com/patHyatt/XmppBot-for-HipChat</licenseUrl>
+    <projectUrl>https://github.com/patHyatt/XmppBot-for-HipChat</projectUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>$description$</description>
+    <releaseNotes>This is the first version ever.</releaseNotes>
+    <copyright>Copyright 2011</copyright>
+  </metadata>
+</package>
