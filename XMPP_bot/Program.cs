@@ -2,7 +2,7 @@
 using System.Linq;
 using Topshelf;
 
-namespace XMPP_bot
+namespace XmppBot.Service
 {
     public class Program
     {

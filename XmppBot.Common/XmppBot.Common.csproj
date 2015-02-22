@@ -53,6 +53,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="IChatUser.cs" />
     <Compile Include="IXmppBotSequencePlugin.cs" />
     <Compile Include="ParsedLine.cs" />
     <Compile Include="IXmppBotPlugin.cs" />

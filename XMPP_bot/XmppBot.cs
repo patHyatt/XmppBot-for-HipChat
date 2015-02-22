@@ -14,14 +14,21 @@ using agsXMPP;
 using agsXMPP.protocol.client;
 using agsXMPP.protocol.iq.roster;
 using agsXMPP.protocol.x.muc;
+using log4net;
 
-namespace XMPP_bot
+namespace XmppBot.Service
 {
     class XmppBot
     {
+        #region log4net
+        private static readonly ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+        #endregion
+
+        private const int MaxRosterSize = 100;
+
         private static DirectoryCatalog _catalog = null;
         private static XmppClientConnection _client = null;
-        private static Dictionary<string, string> _roster = new Dictionary<string, string>(20);
+
 
         public void Stop()
         {
@@ -45,7 +52,7 @@ namespace XMPP_bot
             _catalog.Changed += new EventHandler<ComposablePartCatalogChangeEventArgs>(_catalog_Changed);
             var pluginList = LoadPlugins();
 
-            Console.WriteLine(pluginList);
+            log.Info(pluginList);
 
             _client = new XmppClientConnection(ConfigurationManager.AppSettings["Server"]);
 
@@ -56,10 +63,10 @@ namespace XMPP_bot
             _client.OnMessage += new MessageHandler(xmpp_OnMessage);
             _client.OnError += new ErrorHandler(_client_OnError);
 
-            Console.WriteLine("Connecting...");
+            log.Info("Connecting...");
             _client.Resource = ConfigurationManager.AppSettings["Resource"];
             _client.Open(ConfigurationManager.AppSettings["User"], ConfigurationManager.AppSettings["Password"]);
-            Console.WriteLine("Connected.");
+            log.Info("Connected.");
 
             _client.OnRosterStart += new ObjectHandler(_client_OnRosterStart);
             _client.OnRosterItem += new XmppClientConnection.RosterHandler(_client_OnRosterItem);
@@ -67,7 +74,7 @@ namespace XMPP_bot
 
         static void _client_OnError(object sender, Exception ex)
         {
-            Console.WriteLine("Exception: " + ex);
+            log.Error("Exception: " + ex);
         }
 
         static void _catalog_Changed(object sender, ComposablePartCatalogChangeEventArgs e)
@@ -75,16 +82,31 @@ namespace XMPP_bot
             _catalog.Refresh();
         }
 
+        #region Roster Management
+
+        private static Dictionary<string, IChatUser> _roster = new Dictionary<string, IChatUser>(MaxRosterSize);
+
         static void _client_OnRosterStart(object sender)
         {
-            _roster = new Dictionary<string, string>(20);
+            _roster = new Dictionary<string, IChatUser>(MaxRosterSize);
         }
 
         static void _client_OnRosterItem(object sender, RosterItem item)
         {
             if (!_roster.ContainsKey(item.Jid.User))
-                _roster.Add(item.Jid.User, item.Name);
+            {
+                _addRoster(new ChatUser(item));
+            }
         }
+
+        private static void _addRoster(IChatUser user)
+        {
+            if (!_roster.ContainsKey(user.Bare))
+                _roster.Add(user.Bare, user);
+        }
+
+        #endregion
+
 
         static void xmpp_OnLogin(object sender)
         {
@@ -101,28 +123,18 @@ namespace XMPP_bot
 
         static void xmpp_OnMessage(object sender, Message msg)
         {
-            if (!String.IsNullOrEmpty(msg.Body))
+            if (!string.IsNullOrEmpty(msg.Body))
             {
-                Console.WriteLine("Message : {0} - from {1}", msg.Body, msg.From);
+                log.InfoFormat("Message : {0} - from {1}", msg.Body, msg.From);
 
-                string user;
+                IChatUser user = null;
+                _roster.TryGetValue(msg.From.Bare, out user);
 
-                if (msg.Type != MessageType.groupchat)
-                {
-                    if (!_roster.TryGetValue(msg.From.User, out user))
-                    {
-                        user = "Unknown User";
-                    }
-                }
-                else
-                {
-                    user = msg.From.Resource;
-                }
-
-                if (user == ConfigurationManager.AppSettings["RoomNick"])
+                // we can't find a user or this is the bot talking
+                if (null == user || ConfigurationManager.AppSettings["RoomNick"] == user.Name)
                     return;
 
-                ParsedLine line = new ParsedLine(msg.Body.Trim(), user);
+                ParsedLine line = new ParsedLine(msg.Body.Trim(), user.Name);
 
                 switch (line.Command)
                 {
@@ -192,5 +204,7 @@ namespace XMPP_bot
 
             return builder.ToString();
         }
+
+
     }
 }
