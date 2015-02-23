@@ -70,10 +70,8 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>mkdir "$(SolutionDir)XMPP_Bot\bin\$(ConfigurationName)\plugins\"
-copy "$(TargetDir)*.*" "$(SolutionDir)XmppBot\bin\$(ConfigurationName)\plugins\"
-del "$(SolutionDir)XMPP_Bot\bin\$(ConfigurationName)\plugins\SecureBlackbox.dll"
-del "$(SolutionDir)XMPP_Bot\bin\$(ConfigurationName)\plugins\SecureBlackbox.PGP.dll"</PostBuildEvent>
+    <PostBuildEvent>mkdir "$(SolutionDir)XmppBot\bin\$(ConfigurationName)\plugins\"
+copy "$(TargetDir)*.*" "$(SolutionDir)XmppBot\bin\$(ConfigurationName)\plugins\"</PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

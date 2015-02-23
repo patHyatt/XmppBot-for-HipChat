@@ -115,7 +115,7 @@ namespace XmppBot.Common
                 if (null == user || _config.RoomNick == user.Name)
                     return;
 
-                ParsedLine line = new ParsedLine(msg.From.Bare, msg.Body.Trim(), user);
+                ParsedLine line = new ParsedLine(msg.From.Bare, msg.Body.Trim(), msg.From.User, user, (BotMessageType) msg.Type);
 
                 switch (line.Command)
                 {

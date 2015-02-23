@@ -6,18 +6,20 @@ namespace XmppBot.Common
 {
     public class ParsedLine
     {
-        public ParsedLine(string from, string line, IChatUser user)
+        public ParsedLine(string from, string line, string room, IChatUser user, BotMessageType messageType)
         {
             this.User = user;
             this.Tokens = new Tokens();
 
-            ParseLine(from, line);
+            ParseLine(from, room, line, messageType);
         }
 
-        private void ParseLine(string from, string line)
+        private void ParseLine(string from, string room, string line, BotMessageType messageType)
         {
+            this.Room = room;
             this.From = from;
             this.Raw = line;
+            this.MessageType = messageType;
             this.IsCommand = line.StartsWith("!");
             line = line.TrimStart('!');
 
@@ -77,6 +79,10 @@ namespace XmppBot.Common
         public IChatUser User { get; private set; }
 
         public string From { get; private set; }
+
+        public string Room { get; private set; }
+
+        public BotMessageType MessageType { get; private set; }
 
         public Tokens Tokens { get; set; }
     }
