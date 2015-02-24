@@ -9,6 +9,7 @@ using System.ComponentModel.Composition;
 using System.ComponentModel.Composition.Hosting;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -22,7 +23,8 @@ namespace XmppBot.Common
 
         private const int MaxRosterSize = 100;
 
-        private static DirectoryCatalog _catalog = null;
+        private static AggregateCatalog _catalog = null;
+        private static DirectoryCatalog _directoryCatalog = null;
         private static XmppClientConnection _client = null;
 
 
@@ -45,13 +47,20 @@ namespace XmppBot.Common
                 return loadedAssemblies.FirstOrDefault(asm => asm.FullName == args.Name);
             };
 
+            // use our running app and a directory for our MEF catalog
+            _catalog = new AggregateCatalog();
+            _catalog.Catalogs.Add(new AssemblyCatalog(Assembly.GetEntryAssembly()));
+            
+            // create a MEF directory catalog for the plugins directory
             string pluginsDirectory = Environment.CurrentDirectory + "\\plugins\\";
             if (!Directory.Exists(pluginsDirectory))
             {
                 Directory.CreateDirectory(pluginsDirectory);
             }
+            _directoryCatalog = new DirectoryCatalog(Environment.CurrentDirectory + "\\plugins\\");
+            _catalog.Catalogs.Add(_directoryCatalog);
 
-            _catalog = new DirectoryCatalog(Environment.CurrentDirectory + "\\plugins\\");
+
             _catalog.Changed += new EventHandler<ComposablePartCatalogChangeEventArgs>(_catalog_Changed);
             var pluginList = LoadPlugins();
 
@@ -146,7 +155,8 @@ namespace XmppBot.Common
 
         static void _catalog_Changed(object sender, ComposablePartCatalogChangeEventArgs e)
         {
-            _catalog.Refresh();
+            if (null != _directoryCatalog)
+                _directoryCatalog.Refresh();
         }
 
         #endregion
