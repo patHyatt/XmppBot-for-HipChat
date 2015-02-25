@@ -62,10 +62,6 @@ namespace XmppBot.Common
 
 
             _catalog.Changed += new EventHandler<ComposablePartCatalogChangeEventArgs>(_catalog_Changed);
-            var pluginList = LoadPlugins();
-
-            log.Info(pluginList);
-
             _client = new XmppClientConnection(_config.Server);
 
             //_client.ConnectServer = "talk.google.com"; //necessary if connecting to Google Talk
@@ -134,7 +130,25 @@ namespace XmppBot.Common
                         return;
 
                     case "reload":
-                        SendMessage(msg.From, LoadPlugins(), msg.Type);
+                        LoadPlugins();
+                        SendMessage(msg.From, string.Join("\n", Plugins.Select(p => p.Name)), msg.Type);
+                        break;
+
+                    case "disable":
+                    case "enable":
+                        bool enable = line.Command == "enable";
+                        string target = String.Join(" ", line.Args);
+                        IEnumerable<IXmppBotPlugin> plugins = target == "all" ? Plugins : plugins = Plugins.Where(p => p.Name.Equals(target, StringComparison.OrdinalIgnoreCase));
+
+                        foreach (IXmppBotPlugin plugin in plugins)
+                        {
+                            plugin.Enabled = enable;
+                            this.SendMessage(msg.From, string.Format("{0} - {1}", plugin.Name, line.Command), msg.Type);
+                        }
+                        break;
+
+                    case "list":
+                        this.SendMessage(msg.From, String.Join(", ", Plugins.Select(p => string.Format("\"{0}\"", p.Name))), msg.Type);
                         break;
 
                     default:
@@ -211,7 +225,7 @@ namespace XmppBot.Common
         [ImportMany(AllowRecomposition = true)]
         public static IEnumerable<IXmppBotPlugin> Plugins { get; set; }
 
-        private string LoadPlugins()
+        private void LoadPlugins()
         {
             var container = new CompositionContainer(_catalog);
             Plugins = container.GetExportedValues<IXmppBotPlugin>();
@@ -225,15 +239,11 @@ namespace XmppBot.Common
                 plugin.Initialize();
             }
 
-
-            StringBuilder builder = new StringBuilder();
-            builder.AppendLine("Loaded the following plugins");
+            log.Info("Loaded the following plugins");
             foreach (var part in _catalog.Parts)
             {
-                builder.AppendFormat("\t{0}\n", part.ToString());
+                log.InfoFormat("\t{0}", part.ToString());
             }
-
-            return builder.ToString();
         }
 
         #endregion
