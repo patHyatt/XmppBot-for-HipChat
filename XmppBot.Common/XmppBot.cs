@@ -60,7 +60,6 @@ namespace XmppBot.Common
             _directoryCatalog = new DirectoryCatalog(Environment.CurrentDirectory + "\\plugins\\");
             _catalog.Catalogs.Add(_directoryCatalog);
 
-
             _catalog.Changed += new EventHandler<ComposablePartCatalogChangeEventArgs>(_catalog_Changed);
             _client = new XmppClientConnection(_config.Server);
 
@@ -97,67 +96,75 @@ namespace XmppBot.Common
 
         private void xmpp_OnMessage(object sender, Message msg)
         {
-            if (!string.IsNullOrEmpty(msg.Body))
+            try
             {
-                log.InfoFormat("Message : {0} - from {1}", msg.Body, msg.From);
-
-                IChatUser user = null;
-
-                if (msg.Type == MessageType.groupchat)
+                if (!string.IsNullOrEmpty(msg.Body))
                 {
-                    //msg.From.Resource = User Room Name
-                    //msg.From.Bare = Room 'email'
-                    //msg.From.User = Room id
+                    log.InfoFormat("Message : {0} - from {1}", msg.Body, msg.From);
 
-                    user = _roster.Values.FirstOrDefault(u => u.Name == msg.From.Resource);
-                }
-                else
-                {
-                    _roster.TryGetValue(msg.From.Bare, out user);
-                }
+                    IChatUser user = null;
 
-                // we can't find a user or this is the bot talking
-                if (null == user || _config.RoomNick == user.Name)
-                    return;
+                    if (msg.Type == MessageType.groupchat)
+                    {
+                        //msg.From.Resource = User Room Name
+                        //msg.From.Bare = Room 'email'
+                        //msg.From.User = Room id
 
-                ParsedLine line = new ParsedLine(msg.From.Bare, msg.Body.Trim(), msg.From.User, user, (BotMessageType) msg.Type);
+                        user = _roster.Values.FirstOrDefault(u => u.Name == msg.From.Resource);
+                    }
+                    else
+                    {
+                        _roster.TryGetValue(msg.From.Bare, out user);
+                    }
 
-                switch (line.Command)
-                {
-                    case "close":
-                        SendMessage(msg.From, "I'm a quitter...", msg.Type);
-                        Environment.Exit(1);
+                    // we can't find a user or this is the bot talking
+                    if (null == user || _config.RoomNick == user.Name)
                         return;
 
-                    case "reload":
-                        LoadPlugins();
-                        SendMessage(msg.From, string.Join("\n", Plugins.Select(p => p.Name)), msg.Type);
-                        break;
+                    ParsedLine line = new ParsedLine(msg.From.Bare, msg.Body.Trim(), msg.From.User, user, (BotMessageType)msg.Type);
 
-                    case "disable":
-                    case "enable":
-                        bool enable = line.Command == "enable";
-                        string target = String.Join(" ", line.Args);
-                        IEnumerable<IXmppBotPlugin> plugins = target == "all" ? Plugins : plugins = Plugins.Where(p => p.Name.Equals(target, StringComparison.OrdinalIgnoreCase));
+                    switch (line.Command)
+                    {
+                        case "close":
+                            SendMessage(msg.From, "I'm a quitter...", msg.Type);
+                            Environment.Exit(1);
+                            return;
 
-                        foreach (IXmppBotPlugin plugin in plugins)
-                        {
-                            plugin.Enabled = enable;
-                            this.SendMessage(msg.From, string.Format("{0} - {1}", plugin.Name, line.Command), msg.Type);
-                        }
-                        break;
+                        case "reload":
+                            LoadPlugins();
+                            SendMessage(msg.From, string.Join("\n", Plugins.Select(p => p.Name)), msg.Type);
+                            break;
 
-                    case "list":
-                        this.SendMessage(msg.From, String.Join(", ", Plugins.Select(p => string.Format("\"{0}\"", p.Name))), msg.Type);
-                        break;
+                        case "disable":
+                        case "enable":
+                            bool enable = line.Command == "enable";
+                            string target = String.Join(" ", line.Args);
+                            IEnumerable<IXmppBotPlugin> plugins = target == "all" ? Plugins : plugins = Plugins.Where(p => p.Name.Equals(target, StringComparison.OrdinalIgnoreCase));
 
-                    default:
-                        Task.Factory.StartNew(() =>
-                                              Parallel.ForEach(Plugins,
-                                                  plugin => SendMessage(msg.From, plugin.Evaluate(line), msg.Type)
-                                                  ));
-                        break;
+                            foreach (IXmppBotPlugin plugin in plugins)
+                            {
+                                plugin.Enabled = enable;
+                                this.SendMessage(msg.From, string.Format("{0} - {1}", plugin.Name, line.Command), msg.Type);
+                            }
+                            break;
+
+                        case "list":
+                            this.SendMessage(msg.From, String.Join(", ", Plugins.Select(p => string.Format("\"{0}\"", p.Name))), msg.Type);
+                            break;
+
+                        default:
+                            Task.Factory.StartNew(() =>
+                                                  Parallel.ForEach(Plugins,
+                                                      plugin => SendMessage(msg.From, plugin.Evaluate(line), msg.Type)
+                                                      ));
+                            break;
+                    }
                 }
+            }
+            catch (Exception ex)
+            {
+                log.Error(ex);
+                this.SendMessage(msg.From, "I has some problems executing that command.", msg.Type);
             }
         }
 
@@ -223,12 +230,26 @@ namespace XmppBot.Common
         #region Plugin Management
 
         [ImportMany(AllowRecomposition = true)]
-        public static IEnumerable<IXmppBotPlugin> Plugins { get; set; }
+        private IEnumerable<IXmppBotPlugin> _plugins = null;
+
+
+        protected IEnumerable<IXmppBotPlugin> Plugins
+        {
+            get
+            {
+                if (null == _plugins)
+                {
+                    LoadPlugins();
+                }
+
+                return _plugins;
+            }
+        }
 
         private void LoadPlugins()
         {
             var container = new CompositionContainer(_catalog);
-            Plugins = container.GetExportedValues<IXmppBotPlugin>();
+            _plugins = container.GetExportedValues<IXmppBotPlugin>();
 
             foreach (IXmppBotPlugin plugin in Plugins)
             {
