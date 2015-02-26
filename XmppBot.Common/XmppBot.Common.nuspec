@@ -14,6 +14,7 @@
     <copyright>Copyright 2011</copyright>
 	<references>
 	  <reference file="agsXMPP.dll" />
+	  <reference file="XmppBot.Common.dll" />
 	</references>
   </metadata>
   <files>
