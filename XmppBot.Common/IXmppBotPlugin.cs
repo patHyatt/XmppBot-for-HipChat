@@ -13,6 +13,8 @@ namespace XmppBot.Common
 
         string Name { get; }
 
+        bool Enabled { get; set; }
+
         // this event fires when the bot sends a message to a client
         event PluginMessageHandler SentMessage;
         
