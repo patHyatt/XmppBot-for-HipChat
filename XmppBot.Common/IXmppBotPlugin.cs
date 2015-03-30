@@ -9,6 +9,8 @@ namespace XmppBot.Common
 
         string Evaluate(ParsedLine line);
 
+        string Help(ParsedLine line);
+
         string Name { get; }
 
         // this event fires when the bot sends a message to a client

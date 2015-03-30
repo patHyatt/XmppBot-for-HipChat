@@ -26,7 +26,7 @@ namespace XmppBot.Common
 
         public virtual void Initialize() { }
 
-        public string Help(ParsedLine line)
+        public virtual string Help(ParsedLine line)
         {
             if (this.Commands.Count <= 0)
                 return "";

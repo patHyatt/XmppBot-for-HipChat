@@ -128,6 +128,26 @@ namespace XmppBot.Common
 
                 switch (line.Command)
                 {
+                    case "help":
+                        var helpText = new StringBuilder();
+                        var plist = Plugins.ToList();
+                        plist.Sort((c1, c2) => c1.Name.CompareTo(c2.Name));
+
+                        foreach (var p in plist)
+                        {
+                            var helpLine = p.Help(line);
+                            if (!String.IsNullOrWhiteSpace(helpLine))
+                            {
+                                helpText.AppendLine(p.Help(line));
+                            }
+                        }
+
+                        helpText.AppendLine("-----------------------");
+                        helpText.AppendLine("En/Dis-able a plugin: !disable|!enable <pluginname>");
+                        helpText.AppendLine("List plugin names: !list");
+                        SendMessage(msg.From, helpText.ToString(), msg.Type);
+
+                        break;
                     case "close":
                         SendMessage(msg.From, "I'm a quitter...", msg.Type);
                         Environment.Exit(1);
