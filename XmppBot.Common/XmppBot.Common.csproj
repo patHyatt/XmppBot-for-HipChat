@@ -12,6 +12,7 @@
     <AssemblyName>XmppBot.Common</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -21,6 +22,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -29,6 +31,7 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="agsXMPP, Version=1.1.0.0, Culture=neutral, PublicKeyToken=ff839b81f1debe86, processorArchitecture=MSIL">
@@ -67,11 +70,14 @@
     <Compile Include="ParsedLine.cs" />
     <Compile Include="IXmppBotPlugin.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="QueuedCommand.cs" />
     <Compile Include="Tokens.cs" />
     <Compile Include="XmppBot.cs" />
     <Compile Include="XmppBotCommand.cs" />
     <Compile Include="XmppBotConfig.cs" />
     <Compile Include="XmppBotPluginBase.cs" />
+    <Compile Include="XmppBotConfirmedPluginBase.cs" />
+    <Compile Include="XmppBotQueuedPluginBase.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

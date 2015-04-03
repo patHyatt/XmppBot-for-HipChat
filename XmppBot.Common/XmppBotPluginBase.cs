@@ -52,12 +52,15 @@ namespace XmppBot.Common
 
         public virtual string EvaluateEx(ParsedLine line)
         {
+            if (!line.IsCommand)
+                return null; // this is not a command
+
             XmppBotCommand command = GetCommand(line.Command);
 
             return command == null ? null : command.Method(line);
         }
 
-        private XmppBotCommand GetCommand(string commandText)
+        protected XmppBotCommand GetCommand(string commandText)
         {
             XmppBotCommand cmd = null;
             this.Commands.TryGetValue(commandText, out cmd);
