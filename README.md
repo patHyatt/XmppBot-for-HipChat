@@ -60,7 +60,8 @@ For more info about installing as a service, see the [TopShelf documentation](ht
 ## Issues 
 If you have an issue or identify a bug, please [file an issue](https://github.com/patHyatt/XmppBot-for-HipChat/issues/new) or [create a pull request](https://github.com/patHyatt/XmppBot-for-HipChat/compare).
 
-## Contributors 
+## Contributors
+- [@hartez](https://github.com/hartez)
 - [@hross](https://github.com/hross)
 - [@patHyatt](https://github.com/patHyatt/)
 
