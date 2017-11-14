@@ -11,7 +11,7 @@ namespace XmppBot.Common
 
         public XmppBotCommand(string helpInfo, PluginMethod method)
         {
-            this.HelpInfo = HelpInfo;
+            this.HelpInfo = helpInfo;
             this.Method = method;
         }
 
