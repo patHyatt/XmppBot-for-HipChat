@@ -1,5 +1,12 @@
 # XmppBot-for-HipChat
 
+## NOTICE
+Hipchat was acquired and is no longer available. 
+
+The repository has been archived and is still available mainly, because it's my hottest repo.
+Thanks to everyone who used and built on this.
+
+
 ## What is it
 
 A simple [XMPP](https://en.wikipedia.org/wiki/XMPP) bot written in C# which is easily extended to run your own custom extensions.
